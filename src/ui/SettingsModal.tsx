@@ -51,24 +51,30 @@ interface SliderProps {
   label: string;
   value: number;
   onChange: (value: number) => void;
+  id: string;
 }
 
-function VolumeSlider({ label, value, onChange }: SliderProps) {
+function VolumeSlider({ label, value, onChange, id }: SliderProps) {
   const displayValue = value === 0 ? 'Muted' : `${value}%`;
+  const ariaValueText = value === 0 ? 'Muted' : `${value} percent`;
+  const labelId = `${id}-label`;
 
   return (
     <div className={styles['sliderContainer']}>
       <div className={styles['sliderHeader']}>
-        <span className={styles['sliderLabel']}>{label}</span>
+        <span id={labelId} className={styles['sliderLabel']}>{label}</span>
         <span className={styles['sliderValue']}>{displayValue}</span>
       </div>
       <input
         type="range"
+        id={id}
         min="0"
         max="100"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className={styles['slider']}
+        aria-labelledby={labelId}
+        aria-valuetext={ariaValueText}
         data-no-game-input
       />
     </div>
@@ -79,18 +85,27 @@ interface ToggleProps {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  id: string;
 }
 
-function Toggle({ label, checked, onChange }: ToggleProps) {
+function Toggle({ label, checked, onChange, id }: ToggleProps) {
+  const labelId = `${id}-label`;
+
   return (
     <div className={styles['toggleContainer']}>
-      <span className={styles['toggleLabel']}>{label}</span>
+      <span id={labelId} className={styles['toggleLabel']}>{label}</span>
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
       <button
+        id={id}
+        type="button"
         className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
         onPointerDown={(e) => {
           e.stopPropagation();
           onChange(!checked);
         }}
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={labelId}
         data-no-game-input
       />
     </div>
@@ -137,12 +152,12 @@ function SettingsPanel() {
     { value: 'C', label: VARIANTS.C.name, description: VARIANTS.C.description },
   ];
 
-  const themeOptions: { value: ThemeColor; className: string }[] = [
-    { value: 'cyan', className: styles['colorCyan'] ?? '' },
-    { value: 'magenta', className: styles['colorMagenta'] ?? '' },
-    { value: 'green', className: styles['colorGreen'] ?? '' },
-    { value: 'orange', className: styles['colorOrange'] ?? '' },
-    { value: 'purple', className: styles['colorPurple'] ?? '' },
+  const themeOptions: { value: ThemeColor; className: string; label: string }[] = [
+    { value: 'cyan', className: styles['colorCyan'] ?? '', label: 'Cyan theme' },
+    { value: 'magenta', className: styles['colorMagenta'] ?? '', label: 'Magenta theme' },
+    { value: 'green', className: styles['colorGreen'] ?? '', label: 'Green theme' },
+    { value: 'orange', className: styles['colorOrange'] ?? '', label: 'Orange theme' },
+    { value: 'purple', className: styles['colorPurple'] ?? '', label: 'Purple theme' },
   ];
 
   return (
@@ -159,11 +174,14 @@ function SettingsPanel() {
         <div className={styles['header']}>
           <h2 className={styles['title']}>SETTINGS</h2>
           <button
+            type="button"
             className={styles['closeButton']}
             onPointerDown={(e) => {
               e.stopPropagation();
               closeSettings();
             }}
+            aria-label="Close settings"
+            title="Close settings"
             data-no-game-input
           >
             <CloseIcon />
@@ -174,22 +192,25 @@ function SettingsPanel() {
         <div className={styles['section']}>
           <div className={styles['sectionTitle']}>Visual Style</div>
           <div className={styles['styleOptionGroup']}>
-            {styleOptions.map((option) => (
-              <button
-                key={option.value}
-                className={`${styles['styleOption']} ${
-                  visualVariant === option.value ? styles['active'] : ''
-                }`}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  handleVariantChange(option.value);
-                }}
-                data-no-game-input
-              >
-                <span className={styles['styleLabel']}>{option.label}</span>
-                <span className={styles['styleDescription']}>{option.description}</span>
-              </button>
-            ))}
+            {styleOptions.map((option) => {
+              const isSelected = visualVariant === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles['styleOption']} ${isSelected ? styles['active'] : ''}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleVariantChange(option.value);
+                  }}
+                  {...(isSelected ? { 'aria-pressed': 'true' } : { 'aria-pressed': 'false' })}
+                  data-no-game-input
+                >
+                  <span className={styles['styleLabel']}>{option.label}</span>
+                  <span className={styles['styleDescription']}>{option.description}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -197,19 +218,26 @@ function SettingsPanel() {
         <div className={styles['section']}>
           <div className={styles['sectionTitle']}>Theme Color</div>
           <div className={styles['optionGroup']}>
-            {themeOptions.map((option) => (
-              <button
-                key={option.value}
-                className={`${styles['colorButton']} ${option.className} ${
-                  themeColor === option.value ? styles['active'] : ''
-                }`}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  setThemeColor(option.value);
-                }}
-                data-no-game-input
-              />
-            ))}
+            {themeOptions.map((option) => {
+              const isSelected = themeColor === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles['colorButton']} ${option.className} ${
+                    isSelected ? styles['active'] : ''
+                  }`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setThemeColor(option.value);
+                  }}
+                  aria-label={option.label}
+                  {...(isSelected ? { 'aria-pressed': 'true' } : { 'aria-pressed': 'false' })}
+                  title={option.label}
+                  data-no-game-input
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -217,11 +245,13 @@ function SettingsPanel() {
         <div className={styles['section']}>
           <div className={styles['sectionTitle']}>Audio</div>
           <VolumeSlider
+            id="music-volume"
             label="Music"
             value={musicVolume}
             onChange={setMusicVolume}
           />
           <VolumeSlider
+            id="sfx-volume"
             label="Sound Effects"
             value={sfxVolume}
             onChange={setSfxVolume}
@@ -232,6 +262,7 @@ function SettingsPanel() {
         <div className={styles['section']}>
           <div className={styles['sectionTitle']}>Accessibility</div>
           <Toggle
+            id="reduced-motion"
             label="Reduced Motion"
             checked={reducedMotion}
             onChange={setReducedMotion}
@@ -240,6 +271,7 @@ function SettingsPanel() {
 
         {/* Reset */}
         <button
+          type="button"
           className={styles['resetButton']}
           onPointerDown={(e) => {
             e.stopPropagation();
@@ -266,11 +298,14 @@ export function SettingsButton() {
 
   return (
     <button
+      type="button"
       className={styles['settingsButton']}
       onPointerDown={(e) => {
         e.stopPropagation();
         openSettings();
       }}
+      aria-label="Open settings"
+      title="Settings"
       data-no-game-input
     >
       <GearIcon />
