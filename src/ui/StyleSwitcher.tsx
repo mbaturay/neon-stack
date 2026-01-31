@@ -41,20 +41,22 @@ export function StyleSwitcher() {
         className={styles['segmentedControl']}
         data-no-game-input
       >
-        {VARIANTS.map((variant) => (
-          <button
-            key={variant}
-            className={`${styles['segment']} ${
-              currentVariant === variant ? styles['active'] : ''
-            }`}
-            onPointerDown={(e) => handleVariantSelect(e, variant)}
-            data-no-game-input
-            aria-label={`Visual style ${variant}`}
-            aria-pressed={currentVariant === variant}
-          >
-            {variant}
-          </button>
-        ))}
+        {VARIANTS.map((variant) => {
+          const isActive = currentVariant === variant;
+          return (
+            <button
+              key={variant}
+              type="button"
+              className={`${styles['segment']} ${isActive ? styles['active'] : ''}`}
+              onPointerDown={(e) => handleVariantSelect(e, variant)}
+              data-no-game-input
+              aria-label={`Visual style ${variant}`}
+              {...(isActive ? { 'aria-pressed': 'true' } : { 'aria-pressed': 'false' })}
+            >
+              {variant}
+            </button>
+          );
+        })}
       </div>
       <div className={styles['hint']}>STYLE</div>
     </div>
