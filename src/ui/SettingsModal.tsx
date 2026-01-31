@@ -139,9 +139,10 @@ function SettingsPanel() {
 
   const themeOptions: { value: ThemeColor; className: string }[] = [
     { value: 'cyan', className: styles['colorCyan'] ?? '' },
-    { value: 'red', className: styles['colorRed'] ?? '' },
+    { value: 'magenta', className: styles['colorMagenta'] ?? '' },
     { value: 'green', className: styles['colorGreen'] ?? '' },
     { value: 'orange', className: styles['colorOrange'] ?? '' },
+    { value: 'purple', className: styles['colorPurple'] ?? '' },
   ];
 
   return (
@@ -247,7 +248,7 @@ function SettingsPanel() {
           }}
           data-no-game-input
         >
-          Reset to Defaults
+          RESET TO DEFAULTS
         </button>
       </div>
     </div>

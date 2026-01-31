@@ -1,9 +1,11 @@
 /**
  * Theme color definitions shared between Three.js and UI.
  * Single source of truth for all color-related theming.
+ *
+ * All visual effects MUST use these tokens - no hardcoded colors in effect code.
  */
 
-export type ThemeColor = 'cyan' | 'red' | 'green' | 'orange';
+export type ThemeColor = 'cyan' | 'magenta' | 'green' | 'orange' | 'purple';
 
 export interface ThemeColors {
   /** Primary color for blocks and UI accents */
@@ -12,9 +14,9 @@ export interface ThemeColors {
   primaryDark: string;
   /** Even darker shade for deep stack blocks */
   primaryDeep: string;
-  /** Emissive/glow color */
+  /** Emissive/glow color for Three.js materials */
   emissive: string;
-  /** Light accent for highlights */
+  /** Light accent for highlights, outlines, ghost guides */
   accent: string;
   /** Grid cell color */
   gridCell: string;
@@ -28,63 +30,82 @@ export interface ThemeColors {
   hudBackground: string;
 }
 
+// Cyan - Default theme (#00F6FF)
 const THEME_CYAN: ThemeColors = {
-  primary: '#00ddff',
+  primary: '#00F6FF',
   primaryDark: '#008899',
   primaryDeep: '#006677',
-  emissive: '#00ffff',
-  accent: '#66ffff',
+  emissive: '#00F6FF',
+  accent: '#66FFFF',
   gridCell: '#005566',
-  gridSection: '#00aacc',
-  hudColor: '#00ffff',
-  hudGlow: 'rgba(0, 255, 255, 0.5)',
-  hudBackground: 'rgba(0, 255, 255, 0.1)',
+  gridSection: '#00AACC',
+  hudColor: '#00F6FF',
+  hudGlow: 'rgba(0, 246, 255, 0.5)',
+  hudBackground: 'rgba(0, 246, 255, 0.1)',
 };
 
-const THEME_RED: ThemeColors = {
-  primary: '#ff4466',
-  primaryDark: '#992233',
-  primaryDeep: '#661122',
-  emissive: '#ff6688',
-  accent: '#ff99aa',
-  gridCell: '#552233',
-  gridSection: '#cc4466',
-  hudColor: '#ff6688',
-  hudGlow: 'rgba(255, 102, 136, 0.5)',
-  hudBackground: 'rgba(255, 102, 136, 0.1)',
+// Magenta (#FF2D95)
+const THEME_MAGENTA: ThemeColors = {
+  primary: '#FF2D95',
+  primaryDark: '#99195A',
+  primaryDeep: '#66113D',
+  emissive: '#FF2D95',
+  accent: '#FF7DC0',
+  gridCell: '#551040',
+  gridSection: '#CC2477',
+  hudColor: '#FF2D95',
+  hudGlow: 'rgba(255, 45, 149, 0.5)',
+  hudBackground: 'rgba(255, 45, 149, 0.1)',
 };
 
+// Neon Green (#2BFF88)
 const THEME_GREEN: ThemeColors = {
-  primary: '#44ff88',
-  primaryDark: '#229955',
-  primaryDeep: '#116633',
-  emissive: '#66ffaa',
-  accent: '#99ffcc',
-  gridCell: '#225544',
-  gridSection: '#44cc77',
-  hudColor: '#66ffaa',
-  hudGlow: 'rgba(102, 255, 170, 0.5)',
-  hudBackground: 'rgba(102, 255, 170, 0.1)',
+  primary: '#2BFF88',
+  primaryDark: '#1A9952',
+  primaryDeep: '#116637',
+  emissive: '#2BFF88',
+  accent: '#7FFFC0',
+  gridCell: '#1A5540',
+  gridSection: '#22CC6D',
+  hudColor: '#2BFF88',
+  hudGlow: 'rgba(43, 255, 136, 0.5)',
+  hudBackground: 'rgba(43, 255, 136, 0.1)',
 };
 
+// Neon Orange (#FF9F1C)
 const THEME_ORANGE: ThemeColors = {
-  primary: '#ffaa44',
-  primaryDark: '#996622',
-  primaryDeep: '#664411',
-  emissive: '#ffcc66',
-  accent: '#ffdd99',
-  gridCell: '#554422',
-  gridSection: '#cc8844',
-  hudColor: '#ffcc66',
-  hudGlow: 'rgba(255, 204, 102, 0.5)',
-  hudBackground: 'rgba(255, 204, 102, 0.1)',
+  primary: '#FF9F1C',
+  primaryDark: '#995F11',
+  primaryDeep: '#66400B',
+  emissive: '#FF9F1C',
+  accent: '#FFCC7A',
+  gridCell: '#554010',
+  gridSection: '#CC7F16',
+  hudColor: '#FF9F1C',
+  hudGlow: 'rgba(255, 159, 28, 0.5)',
+  hudBackground: 'rgba(255, 159, 28, 0.1)',
+};
+
+// Neon Purple (#8B5CF6)
+const THEME_PURPLE: ThemeColors = {
+  primary: '#8B5CF6',
+  primaryDark: '#533894',
+  primaryDeep: '#372562',
+  emissive: '#8B5CF6',
+  accent: '#B794F9',
+  gridCell: '#352860',
+  gridSection: '#6F4AC5',
+  hudColor: '#8B5CF6',
+  hudGlow: 'rgba(139, 92, 246, 0.5)',
+  hudBackground: 'rgba(139, 92, 246, 0.1)',
 };
 
 export const THEMES: Record<ThemeColor, ThemeColors> = {
   cyan: THEME_CYAN,
-  red: THEME_RED,
+  magenta: THEME_MAGENTA,
   green: THEME_GREEN,
   orange: THEME_ORANGE,
+  purple: THEME_PURPLE,
 };
 
 export function getTheme(color: ThemeColor): ThemeColors {
