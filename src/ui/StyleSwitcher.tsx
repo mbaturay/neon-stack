@@ -4,6 +4,7 @@
  */
 
 import { useVisualStore } from '@/state/visualStore';
+import { useSettingsStore } from '@/state/settingsStore';
 import type { VisualVariant } from '@/rendering/VisualStyle';
 import styles from './styles/StyleSwitcher.module.css';
 
@@ -12,6 +13,7 @@ const VARIANTS: VisualVariant[] = ['A', 'B', 'C'];
 export function StyleSwitcher() {
   const currentVariant = useVisualStore((state) => state.variant);
   const setVariant = useVisualStore((state) => state.setVariant);
+  const setVisualVariant = useSettingsStore((state) => state.setVisualVariant);
 
   /**
    * Handle variant button press.
@@ -27,7 +29,9 @@ export function StyleSwitcher() {
     // Stop event from bubbling up to game input handler
     e.stopPropagation();
 
+    // Update both stores
     setVariant(variant);
+    setVisualVariant(variant);
   };
 
   return (

@@ -1,11 +1,13 @@
 /**
- * Single block mesh component with variant-aware styling.
+ * Single block mesh component with variant-aware styling and theme colors.
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type { Block as BlockType } from '@/core/types';
 import { useVisualStore } from '@/state/visualStore';
+import { useSettingsStore } from '@/state/settingsStore';
+import { getThemedBlockColors } from '@/game/Theme';
 import type { BlockStyle } from './VisualStyle';
 import * as THREE from 'three';
 
@@ -35,6 +37,8 @@ export function Block({ block, role = 'stacked' }: BlockProps) {
   const { position, dimensions } = block;
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const config = useVisualStore((state) => state.config);
+  const theme = useSettingsStore((state) => state.theme);
+  const reducedMotion = useSettingsStore((state) => state.reducedMotion);
 
   // Get base style based on role
   const baseStyle = useMemo(() => {
@@ -48,12 +52,38 @@ export function Block({ block, role = 'stacked' }: BlockProps) {
     }
   }, [role, config]);
 
-  // Create material
-  const material = useMemo(() => createMaterial(baseStyle), [baseStyle]);
+  // Get theme-adjusted colors
+  const themeColors = useMemo(
+    () => getThemedBlockColors(theme, role),
+    [theme, role]
+  );
 
-  // Handle pulsing for moving block (Variant A)
+  // Create material with theme colors
+  const material = useMemo(() => {
+    const themedStyle: BlockStyle = {
+      ...baseStyle,
+      color: themeColors.color,
+      emissive: themeColors.emissive,
+    };
+    return createMaterial(themedStyle);
+  }, [baseStyle, themeColors]);
+
+  // Update material colors when theme changes
+  useEffect(() => {
+    if (materialRef.current) {
+      materialRef.current.color.set(themeColors.color);
+      materialRef.current.emissive.set(themeColors.emissive);
+    }
+  }, [themeColors]);
+
+  // Handle pulsing for moving block (Variant A, respects reduced motion)
   useFrame((state) => {
-    if (role === 'moving' && config.movingBlockPulse && materialRef.current) {
+    if (
+      role === 'moving' &&
+      config.movingBlockPulse &&
+      !reducedMotion &&
+      materialRef.current
+    ) {
       const pulse =
         Math.sin(state.clock.elapsedTime * config.movingBlockPulseSpeed) * 0.5 + 0.5;
       const intensity =

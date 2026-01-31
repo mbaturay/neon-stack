@@ -4,6 +4,7 @@
 
 import { useGameStore } from '@/state/gameStore';
 import { formatScore } from '@/core/scoring';
+import { SettingsButton } from './SettingsModal';
 import styles from './styles/HUD.module.css';
 
 export function HUD() {
@@ -13,6 +14,8 @@ export function HUD() {
 
   return (
     <div className={styles['container']}>
+      <SettingsButton />
+
       {phase === 'idle' && (
         <div className={styles['startScreen']}>
           <h1 className={styles['title']}>NEON STACK</h1>

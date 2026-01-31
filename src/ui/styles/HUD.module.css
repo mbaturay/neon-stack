@@ -16,8 +16,8 @@
 .score {
   font-size: 4rem;
   font-weight: 200;
-  color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  color: var(--theme-primary, #00ffff);
+  text-shadow: 0 0 20px var(--theme-glow, rgba(0, 255, 255, 0.5));
   letter-spacing: 0.1em;
 }
 
@@ -34,11 +34,11 @@
 .title {
   font-size: 4rem;
   font-weight: 100;
-  color: #00ffff;
+  color: var(--theme-primary, #00ffff);
   text-shadow:
-    0 0 10px rgba(0, 255, 255, 0.8),
-    0 0 30px rgba(0, 255, 255, 0.4),
-    0 0 60px rgba(0, 255, 255, 0.2);
+    0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.8)),
+    0 0 30px var(--theme-glow, rgba(0, 255, 255, 0.4)),
+    0 0 60px var(--theme-glow, rgba(0, 255, 255, 0.2));
   letter-spacing: 0.3em;
   margin-bottom: 2rem;
 }
@@ -54,7 +54,8 @@
 .highScore {
   margin-top: 3rem;
   font-size: 1rem;
-  color: rgba(0, 255, 255, 0.6);
+  color: var(--theme-primary, #00ffff);
+  opacity: 0.6;
   letter-spacing: 0.15em;
 }
 
@@ -80,8 +81,8 @@
 .finalScore {
   font-size: 5rem;
   font-weight: 100;
-  color: #00ffff;
-  text-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+  color: var(--theme-primary, #00ffff);
+  text-shadow: 0 0 30px var(--theme-glow, rgba(0, 255, 255, 0.6));
   letter-spacing: 0.1em;
 }
 

@@ -19,14 +19,17 @@ const DEFAULT_CONFIG: InputConfig = {
 
 type DropCallback = () => void;
 type VariantCallback = (variant: 'A' | 'B' | 'C') => void;
+type EscapeCallback = () => void;
 
 class InputManager {
   private callback: DropCallback | null = null;
   private variantCallback: VariantCallback | null = null;
+  private escapeCallback: EscapeCallback | null = null;
   private config: InputConfig;
   private lastDropTime = 0;
   private activePointerIds = new Set<number>();
   private isInitialized = false;
+  private inputDisabled = false;
   private boundHandlePointerDown: (e: PointerEvent) => void;
   private boundHandleKeyDown: (e: KeyboardEvent) => void;
   private boundPreventGhostClick: (e: MouseEvent) => void;
@@ -36,6 +39,20 @@ class InputManager {
     this.boundHandlePointerDown = this.handlePointerDown.bind(this);
     this.boundHandleKeyDown = this.handleKeyDown.bind(this);
     this.boundPreventGhostClick = this.preventGhostClick.bind(this);
+  }
+
+  /**
+   * Disable game input (used when settings modal is open).
+   */
+  setInputDisabled(disabled: boolean): void {
+    this.inputDisabled = disabled;
+  }
+
+  /**
+   * Check if game input is currently disabled.
+   */
+  isInputDisabled(): boolean {
+    return this.inputDisabled;
   }
 
   /**
@@ -96,6 +113,13 @@ class InputManager {
   }
 
   /**
+   * Register callback for Escape key (close settings).
+   */
+  onEscape(callback: EscapeCallback): void {
+    this.escapeCallback = callback;
+  }
+
+  /**
    * Check if an element should be ignored (UI elements).
    */
   private shouldIgnoreTarget(target: EventTarget | null): boolean {
@@ -129,6 +153,9 @@ class InputManager {
    * Handle pointer down events (touch, mouse, pen).
    */
   private handlePointerDown(e: PointerEvent): void {
+    // Ignore if game input is disabled (settings open)
+    if (this.inputDisabled) return;
+
     // Ignore UI elements
     if (this.shouldIgnoreTarget(e.target)) return;
 
@@ -164,6 +191,17 @@ class InputManager {
     ) {
       return;
     }
+
+    // Escape key - always processed (for closing settings)
+    if (e.code === 'Escape') {
+      if (this.escapeCallback) {
+        this.escapeCallback();
+      }
+      return;
+    }
+
+    // If input is disabled (settings open), block game controls
+    if (this.inputDisabled) return;
 
     // Game controls
     if (e.code === 'Space' || e.code === 'Enter') {

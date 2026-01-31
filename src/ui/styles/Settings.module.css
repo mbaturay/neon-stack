@@ -1,0 +1,343 @@
+/* Settings Modal - Glassmorphism styling */
+
+.settingsButton {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--theme-primary, #00ffff);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  z-index: 100;
+}
+
+.settingsButton:hover {
+  background: var(--theme-background, rgba(0, 255, 255, 0.1));
+  box-shadow: 0 0 20px var(--theme-glow, rgba(0, 255, 255, 0.5));
+  transform: scale(1.05);
+}
+
+.settingsButton:active {
+  transform: scale(0.95);
+}
+
+.settingsIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--theme-primary, #00ffff);
+}
+
+/* Modal overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal panel */
+.modal {
+  background: rgba(10, 20, 30, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--theme-primary, #00ffff);
+  border-radius: 16px;
+  padding: 2rem;
+  min-width: 320px;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow:
+    0 0 40px var(--theme-glow, rgba(0, 255, 255, 0.3)),
+    inset 0 0 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 200;
+  color: var(--theme-primary, #00ffff);
+  letter-spacing: 0.15em;
+  margin: 0;
+  text-shadow: 0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.5));
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.closeButton:hover {
+  border-color: var(--theme-primary, #00ffff);
+  color: var(--theme-primary, #00ffff);
+  background: var(--theme-background, rgba(0, 255, 255, 0.1));
+}
+
+/* Section styling */
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+/* Option buttons (Style A/B/C, Theme colors) */
+.optionGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.optionButton {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.optionButton:hover {
+  border-color: var(--theme-primary, #00ffff);
+  background: var(--theme-background, rgba(0, 255, 255, 0.1));
+}
+
+.optionButton.active {
+  border-color: var(--theme-primary, #00ffff);
+  background: var(--theme-background, rgba(0, 255, 255, 0.15));
+  color: var(--theme-primary, #00ffff);
+  box-shadow: 0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.3));
+}
+
+/* Theme color buttons */
+.colorButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.colorButton::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.colorButton:hover {
+  transform: scale(1.1);
+}
+
+.colorButton.active {
+  border-color: white;
+  box-shadow: 0 0 15px currentColor;
+}
+
+.colorCyan { color: #00ffff; }
+.colorRed { color: #ff6688; }
+.colorGreen { color: #66ffaa; }
+.colorOrange { color: #ffcc66; }
+
+/* Slider styling */
+.sliderContainer {
+  margin-bottom: 1rem;
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.sliderLabel {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sliderValue {
+  font-size: 0.875rem;
+  color: var(--theme-primary, #00ffff);
+  min-width: 50px;
+  text-align: right;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  appearance: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--theme-primary, #00ffff);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.5));
+  transition: transform 0.1s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--theme-primary, #00ffff);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.5));
+}
+
+/* Toggle styling */
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.toggleLabel {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.toggle {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.toggle.active {
+  background: var(--theme-background, rgba(0, 255, 255, 0.2));
+  border-color: var(--theme-primary, #00ffff);
+}
+
+.toggle.active::after {
+  left: 25px;
+  background: var(--theme-primary, #00ffff);
+  box-shadow: 0 0 10px var(--theme-glow, rgba(0, 255, 255, 0.5));
+}
+
+/* Reset button */
+.resetButton {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 100, 100, 0.05);
+  color: rgba(255, 150, 150, 0.8);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover {
+  border-color: rgba(255, 100, 100, 0.6);
+  background: rgba(255, 100, 100, 0.1);
+  color: #ff9999;
+}
+
+/* Scrollbar styling */
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: var(--theme-primary, #00ffff);
+  border-radius: 3px;
+  opacity: 0.5;
+}
