@@ -1,0 +1,118 @@
+.container {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 100;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* Container is non-interactive, only buttons are */
+  pointer-events: none;
+}
+
+.segmentedControl {
+  display: flex;
+  background: rgba(0, 20, 30, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 2px;
+  /* Enable pointer events only on the control */
+  pointer-events: auto;
+  /* Touch optimization */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.segment {
+  /* Reset button styles */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+
+  /* Sizing for touch targets (min 44px recommended) */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+
+  /* Typography */
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+
+  /* Smooth transitions */
+  transition: all 0.15s ease-out;
+  border-radius: 4px;
+
+  /* Touch optimization */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.segment:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 255, 255, 0.1);
+}
+
+.segment:active {
+  transform: scale(0.95);
+}
+
+.segment.active {
+  color: #00ffff;
+  background: rgba(0, 255, 255, 0.2);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+  box-shadow:
+    inset 0 0 8px rgba(0, 255, 255, 0.15),
+    0 0 4px rgba(0, 255, 255, 0.3);
+}
+
+.segment.active:hover {
+  background: rgba(0, 255, 255, 0.25);
+}
+
+.hint {
+  margin-top: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(0, 255, 255, 0.5);
+  letter-spacing: 0.15em;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 480px) {
+  .container {
+    bottom: 0.75rem;
+    left: 0.75rem;
+  }
+
+  .segment {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 1.2rem;
+  }
+}
+
+/* Landscape mobile - move to corner to avoid obstruction */
+@media (max-height: 480px) and (orientation: landscape) {
+  .container {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .segment {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+  }
+
+  .hint {
+    display: none;
+  }
+}

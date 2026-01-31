@@ -1,0 +1,39 @@
+.container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.combo {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffdd00;
+  text-shadow:
+    0 0 10px rgba(255, 221, 0, 0.8),
+    0 0 30px rgba(255, 221, 0, 0.4);
+  letter-spacing: 0.1em;
+  animation: comboPopup 1s ease-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes comboPopup {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1) translateY(-50px);
+    opacity: 0;
+  }
+}
