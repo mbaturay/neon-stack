@@ -1,12 +1,14 @@
 /**
  * Ghost guide showing projected overlap area (Variant C).
  * Renders a faint outline on top of the stack showing where the block will land.
+ * Uses theme colors for consistent styling.
  */
 
 import { useMemo } from 'react';
 import { Line } from '@react-three/drei';
 import { useGameStore } from '@/state/gameStore';
 import { useVisualStore } from '@/state/visualStore';
+import { useSettingsStore } from '@/state/settingsStore';
 import { calculateAxisOverlap } from '@/core/geometry';
 import { GAME_CONSTANTS } from '@/core/types';
 import * as THREE from 'three';
@@ -16,6 +18,7 @@ export function GhostGuide() {
   const blocks = useGameStore((state) => state.blocks);
   const movingAxis = useGameStore((state) => state.movingAxis);
   const config = useVisualStore((state) => state.config);
+  const theme = useSettingsStore((state) => state.theme);
 
   // Calculate the overlap region
   const overlapData = useMemo(() => {
@@ -67,12 +70,15 @@ export function GhostGuide() {
 
   if (!overlapData || !outlinePoints) return null;
 
+  // Use theme accent color for the ghost guide
+  const guideColor = theme.accent;
+
   return (
     <group position={[overlapData.x, overlapData.y, overlapData.z]}>
       {/* Thin outline */}
       <Line
         points={outlinePoints}
-        color={config.ghostGuideColor}
+        color={guideColor}
         lineWidth={1}
         transparent
         opacity={config.ghostGuideOpacity}
@@ -83,7 +89,7 @@ export function GhostGuide() {
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[overlapData.width, overlapData.depth]} />
         <meshBasicMaterial
-          color={config.ghostGuideColor}
+          color={guideColor}
           transparent
           opacity={config.ghostGuideOpacity * 0.3}
           side={THREE.DoubleSide}

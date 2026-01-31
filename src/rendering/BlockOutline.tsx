@@ -1,12 +1,13 @@
 /**
  * Outline effect for block edges (Variant B).
  * Renders a wireframe-style outline around the top face.
+ * Uses theme colors for consistent styling.
  */
 
 import { useMemo } from 'react';
 import { Line } from '@react-three/drei';
 import type { Block as BlockType } from '@/core/types';
-import { useVisualStore } from '@/state/visualStore';
+import { useSettingsStore } from '@/state/settingsStore';
 
 interface BlockOutlineProps {
   block: BlockType;
@@ -14,7 +15,7 @@ interface BlockOutlineProps {
 
 export function BlockOutline({ block }: BlockOutlineProps) {
   const { position, dimensions } = block;
-  const config = useVisualStore((state) => state.config);
+  const theme = useSettingsStore((state) => state.theme);
 
   // Create outline points for top face perimeter
   const points = useMemo((): [number, number, number][] => {
@@ -35,7 +36,7 @@ export function BlockOutline({ block }: BlockOutlineProps) {
     <group position={[position.x, position.y, position.z]}>
       <Line
         points={points}
-        color={config.outlineColor}
+        color={theme.accent}
         lineWidth={2}
         transparent
         opacity={0.9}

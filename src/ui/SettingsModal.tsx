@@ -8,7 +8,7 @@ import { useGameStore } from '@/state/gameStore';
 import { useSettingsStore } from '@/state/settingsStore';
 import { useVisualStore } from '@/state/visualStore';
 import { inputManager } from '@/game/Input';
-import type { VisualVariant } from '@/rendering/VisualStyle';
+import { VARIANTS, type VisualVariant } from '@/rendering/VisualStyle';
 import type { ThemeColor } from '@/game/Theme';
 import styles from './styles/Settings.module.css';
 
@@ -131,10 +131,10 @@ function SettingsPanel() {
     e.stopPropagation();
   };
 
-  const styleOptions: { value: VisualVariant; label: string }[] = [
-    { value: 'A', label: 'Style A' },
-    { value: 'B', label: 'Style B' },
-    { value: 'C', label: 'Style C' },
+  const styleOptions: { value: VisualVariant; label: string; description: string }[] = [
+    { value: 'A', label: VARIANTS.A.name, description: VARIANTS.A.description },
+    { value: 'B', label: VARIANTS.B.name, description: VARIANTS.B.description },
+    { value: 'C', label: VARIANTS.C.name, description: VARIANTS.C.description },
   ];
 
   const themeOptions: { value: ThemeColor; className: string }[] = [
@@ -172,11 +172,11 @@ function SettingsPanel() {
         {/* Visual Style */}
         <div className={styles['section']}>
           <div className={styles['sectionTitle']}>Visual Style</div>
-          <div className={styles['optionGroup']}>
+          <div className={styles['styleOptionGroup']}>
             {styleOptions.map((option) => (
               <button
                 key={option.value}
-                className={`${styles['optionButton']} ${
+                className={`${styles['styleOption']} ${
                   visualVariant === option.value ? styles['active'] : ''
                 }`}
                 onPointerDown={(e) => {
@@ -185,7 +185,8 @@ function SettingsPanel() {
                 }}
                 data-no-game-input
               >
-                {option.label}
+                <span className={styles['styleLabel']}>{option.label}</span>
+                <span className={styles['styleDescription']}>{option.description}</span>
               </button>
             ))}
           </div>

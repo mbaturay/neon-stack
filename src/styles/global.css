@@ -1,0 +1,50 @@
+/**
+ * Global styles for Neon Stack.
+ * Defines the app-wide font and base styling.
+ */
+
+:root {
+  /* Default theme colors (will be overridden by Theme.ts) */
+  --theme-primary: #00ffff;
+  --theme-glow: rgba(0, 255, 255, 0.5);
+  --theme-background: rgba(0, 255, 255, 0.1);
+
+  /* App-wide font stack */
+  --font-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0f;
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Prevent text selection during gameplay */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection in inputs */
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
