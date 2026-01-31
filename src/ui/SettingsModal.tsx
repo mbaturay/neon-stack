@@ -94,7 +94,6 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
   return (
     <div className={styles['toggleContainer']}>
       <span id={labelId} className={styles['toggleLabel']}>{label}</span>
-      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
       <button
         id={id}
         type="button"
