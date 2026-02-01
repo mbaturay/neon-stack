@@ -3,7 +3,11 @@
  *
  * Uses Pointer Events as the primary mechanism with de-duplication guards
  * to ensure exactly one drop per user intent.
+ *
+ * Also handles audio context unlock on first user gesture.
  */
+
+import { getAudioManager } from '@/audio';
 
 export interface InputConfig {
   /** Minimum time between drops in ms */
@@ -30,6 +34,7 @@ class InputManager {
   private activePointerIds = new Set<number>();
   private isInitialized = false;
   private inputDisabled = false;
+  private audioUnlocked = false;
   private boundHandlePointerDown: (e: PointerEvent) => void;
   private boundHandleKeyDown: (e: KeyboardEvent) => void;
   private boundPreventGhostClick: (e: MouseEvent) => void;
@@ -39,6 +44,16 @@ class InputManager {
     this.boundHandlePointerDown = this.handlePointerDown.bind(this);
     this.boundHandleKeyDown = this.handleKeyDown.bind(this);
     this.boundPreventGhostClick = this.preventGhostClick.bind(this);
+  }
+
+  /**
+   * Unlock audio context on first user gesture.
+   * Called internally on first interaction.
+   */
+  private unlockAudio(): void {
+    if (this.audioUnlocked) return;
+    this.audioUnlocked = true;
+    getAudioManager().initFromUserGesture();
   }
 
   /**
@@ -153,6 +168,9 @@ class InputManager {
    * Handle pointer down events (touch, mouse, pen).
    */
   private handlePointerDown(e: PointerEvent): void {
+    // Unlock audio on first user gesture (any pointer down)
+    this.unlockAudio();
+
     // Ignore if game input is disabled (settings open)
     if (this.inputDisabled) return;
 
@@ -184,6 +202,9 @@ class InputManager {
    * Handle keyboard input.
    */
   private handleKeyDown(e: KeyboardEvent): void {
+    // Unlock audio on first user gesture (any key press)
+    this.unlockAudio();
+
     // Ignore if typing in an input field
     if (
       e.target instanceof HTMLInputElement ||

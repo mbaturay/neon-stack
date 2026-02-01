@@ -8,9 +8,15 @@ import { useGameStore } from '@/state/gameStore';
 import { useSettingsStore } from '@/state/settingsStore';
 import { useVisualStore } from '@/state/visualStore';
 import { inputManager } from '@/game/Input';
+import { getAudioManager } from '@/audio';
 import { VARIANTS, type VisualVariant } from '@/rendering/VisualStyle';
 import type { ThemeColor } from '@/game/Theme';
 import styles from './styles/Settings.module.css';
+
+/** Play UI click sound */
+function playUIClick() {
+  getAudioManager().play('ui');
+}
 
 function GearIcon() {
   return (
@@ -100,6 +106,7 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
           className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
           onPointerDown={(e) => {
             e.stopPropagation();
+            playUIClick();
             onChange(!checked);
           }}
           role="switch"
@@ -178,6 +185,7 @@ function SettingsPanel() {
             className={styles['closeButton']}
             onPointerDown={(e) => {
               e.stopPropagation();
+              playUIClick();
               closeSettings();
             }}
             aria-label="Close settings"
@@ -201,6 +209,7 @@ function SettingsPanel() {
                   className={`${styles['styleOption']} ${isSelected ? styles['active'] : ''}`}
                   onPointerDown={(e) => {
                     e.stopPropagation();
+                    playUIClick();
                     handleVariantChange(option.value);
                   }}
                   {...(isSelected ? { 'aria-pressed': 'true' } : { 'aria-pressed': 'false' })}
@@ -229,6 +238,7 @@ function SettingsPanel() {
                   }`}
                   onPointerDown={(e) => {
                     e.stopPropagation();
+                    playUIClick();
                     setThemeColor(option.value);
                   }}
                   aria-label={option.label}
@@ -275,6 +285,7 @@ function SettingsPanel() {
           className={styles['resetButton']}
           onPointerDown={(e) => {
             e.stopPropagation();
+            playUIClick();
             resetToDefaults();
             setVariant('A');
           }}
@@ -302,6 +313,7 @@ export function SettingsButton() {
       className={styles['settingsButton']}
       onPointerDown={(e) => {
         e.stopPropagation();
+        playUIClick();
         openSettings();
       }}
       aria-label="Open settings"
