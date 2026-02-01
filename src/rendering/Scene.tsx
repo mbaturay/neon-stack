@@ -6,11 +6,11 @@ import { Canvas } from '@react-three/fiber';
 import { BlockStack } from './BlockStack';
 import { MovingBlock } from './MovingBlock';
 import { FallingPieces } from './FallingPieces';
-import { PerfectHitEffect } from './PerfectHitEffect';
 import { CameraRig } from './CameraRig';
 import { GameController } from './GameController';
 import { Effects } from './Effects';
 import { Ground } from './Ground';
+import { VFXController } from './VFXController';
 import { useInput } from '@/hooks/useInput';
 
 function SceneContent() {
@@ -30,7 +30,9 @@ function SceneContent() {
       <BlockStack />
       <MovingBlock />
       <FallingPieces />
-      <PerfectHitEffect />
+
+      {/* VFX System */}
+      <VFXController />
 
       {/* Controllers */}
       <CameraRig />

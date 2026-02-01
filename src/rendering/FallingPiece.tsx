@@ -1,6 +1,7 @@
 /**
  * A falling piece that animates after a block is sliced.
  * Uses theme colors for consistent styling.
+ * Includes emissive fade effect as the piece falls.
  */
 
 import { useRef, useMemo, useEffect } from 'react';
@@ -8,6 +9,7 @@ import { useFrame } from '@react-three/fiber';
 import type { FallingPiece as FallingPieceType } from '@/core/types';
 import { GAME_CONSTANTS } from '@/core/types';
 import { useSettingsStore } from '@/state/settingsStore';
+import { VFX_CONFIG } from '@/game/vfx';
 import * as THREE from 'three';
 
 interface FallingPieceProps {
@@ -21,14 +23,15 @@ export function FallingPiece({ piece }: FallingPieceProps) {
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const velocityRef = useRef({ ...piece.velocity });
   const rotationRef = useRef({ x: 0, y: 0, z: 0 });
+  const elapsedRef = useRef(0);
   const theme = useSettingsStore((state) => state.theme);
 
-  // Create material with theme colors
+  // Create material with theme colors and high initial emissive
   const material = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: theme.primary,
       emissive: theme.emissive,
-      emissiveIntensity: 0.3,
+      emissiveIntensity: VFX_CONFIG.CUT_EMISSIVE_START_INTENSITY,
       metalness: 0.1,
       roughness: 0.2,
       transparent: true,
@@ -45,7 +48,11 @@ export function FallingPiece({ piece }: FallingPieceProps) {
   }, [theme.primary, theme.emissive]);
 
   useFrame((_, delta) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || !materialRef.current) return;
+
+    // Track elapsed time for emissive fade
+    const deltaMs = delta * 1000;
+    elapsedRef.current += deltaMs;
 
     // Apply gravity
     velocityRef.current.y += GAME_CONSTANTS.GRAVITY * delta;
@@ -63,6 +70,17 @@ export function FallingPiece({ piece }: FallingPieceProps) {
     meshRef.current.rotation.x = rotationRef.current.x;
     meshRef.current.rotation.y = rotationRef.current.y;
     meshRef.current.rotation.z = rotationRef.current.z;
+
+    // Emissive fade: reduce emissive intensity over time
+    const fadeProgress = Math.min(
+      elapsedRef.current / VFX_CONFIG.CUT_EMISSIVE_FADE_DURATION,
+      1
+    );
+    const intensityRange =
+      VFX_CONFIG.CUT_EMISSIVE_START_INTENSITY -
+      VFX_CONFIG.CUT_EMISSIVE_END_INTENSITY;
+    materialRef.current.emissiveIntensity =
+      VFX_CONFIG.CUT_EMISSIVE_START_INTENSITY - intensityRange * fadeProgress;
   });
 
   const { position, dimensions } = piece.block;
