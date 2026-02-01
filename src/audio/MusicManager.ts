@@ -31,6 +31,7 @@ const TRACK_URLS = [
  */
 const FADE_IN_DURATION = 0.25;
 const FADE_OUT_DURATION = 0.35;
+const MAX_MUSIC_GAIN = 0.2;
 
 function debugLog(message: string, ...args: unknown[]): void {
   if (MUSIC_DEBUG) {
@@ -304,20 +305,22 @@ class MusicManagerImpl {
   }
 
   /**
-   * Set music volume (0-1).
+   * Set music volume (UI 0-100).
    * If volume becomes 0, fade out and stop.
    */
-  setVolume(v01: number): void {
-    const clampedVolume = Math.max(0, Math.min(1, v01));
-    this.targetVolume = clampedVolume;
+  setVolume(uiVolume: number): void {
+    const uiClamped = Math.max(0, Math.min(100, uiVolume <= 1 ? uiVolume * 100 : uiVolume));
+    const normalized = uiClamped / 100;
+    const targetGain = normalized * MAX_MUSIC_GAIN;
+    this.targetVolume = targetGain;
 
-    debugLog('Volume set to', clampedVolume);
+    debugLog(`uiVolume=${Math.round(uiClamped)}% -> gain=${targetGain.toFixed(3)}`);
 
     if (!this.gainNode || !this.audioContext) {
       return;
     }
 
-    if (clampedVolume <= 0) {
+    if (targetGain <= 0) {
       // Fade out and stop
       if (this.isPlaying) {
         this.stop();
@@ -329,7 +332,7 @@ class MusicManagerImpl {
     const now = this.audioContext.currentTime;
     this.gainNode.gain.cancelScheduledValues(now);
     this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
-    this.gainNode.gain.linearRampToValueAtTime(clampedVolume, now + 0.1);
+    this.gainNode.gain.linearRampToValueAtTime(targetGain, now + 0.1);
   }
 
   /**
