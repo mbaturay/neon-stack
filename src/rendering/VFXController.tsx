@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getVFXManager, resetVFXManager } from '@/game/vfx';
-import { getAudioManager } from '@/audio';
+import { getAudioManager, getMusicManager } from '@/audio';
 import { useSettingsStore } from '@/state/settingsStore';
 import { useGameStore } from '@/state/gameStore';
 
@@ -16,6 +16,7 @@ export function VFXController() {
   const { scene } = useThree();
   const vfxManager = getVFXManager();
   const audioManager = getAudioManager();
+  const musicManager = getMusicManager();
   const initializedRef = useRef(false);
 
   // Get theme for color updates
@@ -70,6 +71,11 @@ export function VFXController() {
     audioManager.setMusicVolume(musicVolume);
   }, [musicVolume, audioManager]);
 
+  // Sync music volume with MusicManager (0-100 -> 0-1)
+  useEffect(() => {
+    musicManager.setVolume(musicVolume / 100);
+  }, [musicVolume, musicManager]);
+
   // Detect game events and trigger VFX + Audio
   useEffect(() => {
     // Game over detection
@@ -80,20 +86,23 @@ export function VFXController() {
         : 0;
       vfxManager.onGameOver({ stackHeight });
       audioManager.play('gameover');
+      musicManager.stop();
     }
 
-    // Game restart detection
+    // Game restart detection (from gameover)
     if (prevPhaseRef.current === 'gameover' && phase === 'playing') {
       vfxManager.onRestart();
+      musicManager.startLoop();
     }
 
-    // Also restart from idle
+    // Game start from idle
     if (prevPhaseRef.current === 'idle' && phase === 'playing') {
       vfxManager.onRestart();
+      musicManager.startLoop();
     }
 
     prevPhaseRef.current = phase;
-  }, [phase, blocks, vfxManager, audioManager]);
+  }, [phase, blocks, vfxManager, audioManager, musicManager]);
 
   // Unified placement detection - triggers on blocks.length increase
   // This handles both perfect and slice placements

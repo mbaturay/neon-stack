@@ -7,7 +7,7 @@
  * Also handles audio context unlock on first user gesture.
  */
 
-import { getAudioManager } from '@/audio';
+import { getAudioManager, getMusicManager } from '@/audio';
 
 export interface InputConfig {
   /** Minimum time between drops in ms */
@@ -54,6 +54,7 @@ class InputManager {
     if (this.audioUnlocked) return;
     this.audioUnlocked = true;
     getAudioManager().initFromUserGesture();
+    getMusicManager().unlock();
   }
 
   /**
