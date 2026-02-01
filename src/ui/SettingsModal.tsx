@@ -3,12 +3,12 @@
  * Visible only on launch and game over states.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/state/gameStore';
 import { useSettingsStore } from '@/state/settingsStore';
 import { useVisualStore } from '@/state/visualStore';
 import { inputManager } from '@/game/Input';
-import { getAudioManager } from '@/audio';
+import { getAudioManager, getMusicManager } from '@/audio';
 import { VARIANTS, type VisualVariant } from '@/rendering/VisualStyle';
 import type { ThemeColor } from '@/game/Theme';
 import styles from './styles/Settings.module.css';
@@ -120,6 +120,8 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
 }
 
 function SettingsPanel() {
+  const phase = useGameStore((state) => state.phase);
+  const musicManager = getMusicManager();
   const {
     visualVariant,
     themeColor,
@@ -140,6 +142,13 @@ function SettingsPanel() {
   const handleVariantChange = (variant: VisualVariant) => {
     setVisualVariant(variant);
     setVariant(variant);
+  };
+
+  const handleMusicVolumeChange = (value: number) => {
+    setMusicVolume(value);
+    if (phase !== 'playing') {
+      musicManager.startLoop();
+    }
   };
 
   const handleOverlayClick = (e: React.PointerEvent) => {
@@ -258,7 +267,7 @@ function SettingsPanel() {
             id="music-volume"
             label="Music"
             value={musicVolume}
-            onChange={setMusicVolume}
+            onChange={handleMusicVolumeChange}
           />
           <VolumeSlider
             id="sfx-volume"
@@ -327,6 +336,9 @@ export function SettingsButton() {
 
 export function SettingsModal() {
   const { isSettingsOpen, closeSettings } = useSettingsStore();
+  const phase = useGameStore((state) => state.phase);
+  const musicManager = getMusicManager();
+  const prevOpenRef = useRef(isSettingsOpen);
 
   // Disable game input when settings is open
   useEffect(() => {
@@ -335,6 +347,14 @@ export function SettingsModal() {
       inputManager.setInputDisabled(false);
     };
   }, [isSettingsOpen]);
+
+  // Stop preview music when settings closes outside gameplay
+  useEffect(() => {
+    if (prevOpenRef.current && !isSettingsOpen && phase !== 'playing') {
+      musicManager.stop();
+    }
+    prevOpenRef.current = isSettingsOpen;
+  }, [isSettingsOpen, phase, musicManager]);
 
   // Handle escape key
   useEffect(() => {
