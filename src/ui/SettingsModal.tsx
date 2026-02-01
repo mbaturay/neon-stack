@@ -104,7 +104,7 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
           id={id}
           type="button"
           className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
-          onPointerDown={(e) => {
+          onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => {
             e.stopPropagation();
             playUIClick();
             onChange(!checked);
