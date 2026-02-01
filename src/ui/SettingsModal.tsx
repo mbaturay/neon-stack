@@ -95,18 +95,19 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
     <div className={styles['toggleContainer']}>
       <span id={labelId} className={styles['toggleLabel']}>{label}</span>
       <button
-        id={id}
-        type="button"
-        className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          onChange(!checked);
-        }}
-        role="switch"
-        aria-checked={checked}
-        aria-labelledby={labelId}
-        data-no-game-input
-      />
+          id={id}
+          type="button"
+          className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onChange(!checked);
+          }}
+          role="switch"
+          aria-checked={checked ? 'true' : 'false'}
+          aria-labelledby={labelId}
+          data-no-game-input
+        >
+      </button>
     </div>
   );
 }
