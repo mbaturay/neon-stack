@@ -26,6 +26,8 @@ const TRACK_URLS = [
   '/music/NS-7.mp3',
 ];
 
+import { getAudioManager } from './AudioManager';
+
 /**
  * Fade durations in seconds
  */
@@ -57,6 +59,7 @@ class MusicManagerImpl {
   private gainNode: GainNode | null = null;
   private audioElement: HTMLAudioElement | null = null;
   private mediaSource: MediaElementAudioSourceNode | null = null;
+  private ownsAudioContext: boolean = false;
 
   private shuffleBag: number[] = [];
   private lastPlayedIndex: number = -1;
@@ -79,6 +82,11 @@ class MusicManagerImpl {
     this.audioElement = new Audio();
     this.audioElement.loop = true;
     this.audioElement.preload = 'auto';
+
+    // Safari/iOS friendliness
+    // (TypeScript doesn't type playsInline on HTMLAudioElement)
+    (this.audioElement as unknown as { playsInline?: boolean }).playsInline = true;
+    this.audioElement.crossOrigin = 'anonymous';
 
     // Handle playback errors
     this.audioElement.addEventListener('error', (e) => {
@@ -112,10 +120,23 @@ class MusicManagerImpl {
     debugLog('Starting unlock...');
 
     try {
-      // Create AudioContext on user gesture
-      debugLog('Creating AudioContext...');
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      debugLog('AudioContext created', { state: this.audioContext.state });
+      // Prefer sharing AudioManager's AudioContext to avoid Safari/macOS issues
+      const audioManager = getAudioManager();
+      await audioManager.initFromUserGesture();
+
+      const sharedContext = audioManager.getWebAudioContext();
+      const sharedMaster = audioManager.getMasterGainNode();
+
+      if (sharedContext && sharedMaster) {
+        this.audioContext = sharedContext;
+        this.ownsAudioContext = false;
+        debugLog('Using shared AudioContext from AudioManager', { state: this.audioContext.state });
+      } else {
+        debugLog('Falling back to dedicated AudioContext...');
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.ownsAudioContext = true;
+        debugLog('Dedicated AudioContext created', { state: this.audioContext.state });
+      }
 
       // Resume if suspended
       if (this.audioContext.state === 'suspended') {
@@ -124,11 +145,17 @@ class MusicManagerImpl {
         debugLog('AudioContext resumed', { state: this.audioContext.state });
       }
 
-      // Create gain node for volume control
+      // Create gain node for volume control (connect to shared master bus if available)
       debugLog('Creating GainNode...');
       this.gainNode = this.audioContext.createGain();
       this.gainNode.gain.value = this.targetVolume;
-      this.gainNode.connect(this.audioContext.destination);
+
+      if (sharedContext && sharedMaster && this.audioContext === sharedContext) {
+        this.gainNode.connect(sharedMaster);
+      } else {
+        this.gainNode.connect(this.audioContext.destination);
+      }
+
       debugLog('GainNode connected');
 
       // Connect audio element to WebAudio
@@ -245,6 +272,7 @@ class MusicManagerImpl {
     try {
       // Set source
       this.audioElement.src = trackUrl;
+      this.audioElement.load();
       this.audioElement.currentTime = 0;
 
       // Fade in: start at 0, ramp to target
@@ -366,7 +394,9 @@ class MusicManagerImpl {
     }
 
     if (this.audioContext) {
-      this.audioContext.close();
+      if (this.ownsAudioContext) {
+        this.audioContext.close();
+      }
       this.audioContext = null;
     }
 
@@ -378,6 +408,7 @@ class MusicManagerImpl {
     this.isInitialized = false;
     this.isUnlocked = false;
     this.isPlaying = false;
+    this.ownsAudioContext = false;
 
     debugLog('Disposed');
   }

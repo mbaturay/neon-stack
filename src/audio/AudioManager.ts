@@ -115,6 +115,21 @@ class AudioManagerImpl {
   }
 
   /**
+   * Internal routing access for systems that want to share this AudioContext.
+   * (Used by MusicManager to avoid creating a second AudioContext on Safari.)
+   */
+  getWebAudioContext(): AudioContext | null {
+    return this.context;
+  }
+
+  /**
+   * Internal routing access for systems that want to connect into the master bus.
+   */
+  getMasterGainNode(): GainNode | null {
+    return this.masterGain;
+  }
+
+  /**
    * Set SFX volume (0-100).
    */
   setSfxVolume(volume: number): void {
