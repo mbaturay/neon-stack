@@ -92,9 +92,10 @@ interface ToggleProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   id: string;
+  disabled?: boolean;
 }
 
-function Toggle({ label, checked, onChange, id }: ToggleProps) {
+function Toggle({ label, checked, onChange, id, disabled = false }: ToggleProps) {
   const labelId = `${id}-label`;
 
   return (
@@ -103,8 +104,9 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
       <button
           id={id}
           type="button"
-          className={`${styles['toggle']} ${checked ? styles['active'] : ''}`}
+          className={`${styles['toggle']} ${checked ? styles['active'] : ''} ${disabled ? styles['disabled'] : ''}`}
           onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) => {
+            if (disabled) return;
             e.stopPropagation();
             playUIClick();
             onChange(!checked);
@@ -112,6 +114,8 @@ function Toggle({ label, checked, onChange, id }: ToggleProps) {
           role="switch"
           aria-checked={checked ? 'true' : 'false'}
           aria-labelledby={labelId}
+          aria-disabled={disabled ? 'true' : 'false'}
+          disabled={disabled}
           data-no-game-input
         >
       </button>
@@ -285,6 +289,7 @@ function SettingsPanel() {
             label="Reduced Motion"
             checked={reducedMotion}
             onChange={setReducedMotion}
+            disabled={visualVariant !== 'A'}
           />
         </div>
 

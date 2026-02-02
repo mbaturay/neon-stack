@@ -1,7 +1,7 @@
 /**
  * Camera controller that smoothly follows the stack height.
  * Both position and lookAt target are interpolated for smooth movement.
- * On game over, slowly zooms out and orbits around the structure.
+ * On idle launch screen and game over, slowly zooms out and orbits around the structure.
  */
 
 import { useRef } from 'react';
@@ -33,13 +33,15 @@ export function CameraRig() {
   useFrame((_, delta) => {
     const stackHeight = blocks.length * GAME_CONSTANTS.BLOCK_HEIGHT;
 
-    if (phase === 'gameover') {
-      // Game over: slowly zoom out and orbit around the structure
-      const structureCenterY = stackHeight / 2;
-      const targetDistance = GAMEOVER_ZOOM_OUT_DISTANCE + stackHeight * 0.5;
+    if (phase === 'idle' || phase === 'gameover') {
+      // Idle/Game over: slowly zoom out and orbit around the structure
+      const structureCenterY = phase === 'idle' ? 2 : stackHeight / 2;
+      const targetDistance = phase === 'idle'
+        ? GAMEOVER_ZOOM_OUT_DISTANCE
+        : GAMEOVER_ZOOM_OUT_DISTANCE + stackHeight * 0.5;
       const targetPosY = structureCenterY + CAMERA_HEIGHT_OFFSET * 0.5;
 
-      // Slowly interpolate to game over view
+      // Slowly interpolate to cinematic view
       currentDistance.current = THREE.MathUtils.lerp(
         currentDistance.current,
         targetDistance,
