@@ -15,6 +15,33 @@ npm run dev
 
 Open http://localhost:5173 (or use your LAN IP for mobile testing).
 
+## How to Play
+
+**Goal:** stack blocks as high as you can without missing.
+
+1. **Start** the game with **Space / Enter / Click / Tap**.
+2. Watch the moving block slide back and forth.
+3. **Drop** at the right moment to land on the stack.
+4. Any part that overhangs gets **sliced off** (making the next block smaller).
+5. Keep landing blocks to build **combo multipliers** and increase your score.
+
+### Scoring & Combos
+
+- **Perfect hits** (very small offset) preserve the block size and build a streak.
+- Streaks increase your **combo multiplier** (2x, 4x, 8x, ...).
+- The game ends when a block **completely misses** the stack.
+
+### Tips
+
+- Focus on the **leading edge** of the moving block.
+- Early in the run, prioritize **perfect hits** to keep the block large.
+- If the block gets tiny, aim for **safe center landings** to stabilize.
+
+### Settings / Audio Notes
+
+- You can adjust **Music** and **SFX** volume in the in-game settings.
+- Browsers require a **user gesture** before playing audio; on mobile/macOS, click/tap once if you don’t hear music right away.
+
 ## Controls
 
 - **Space / Enter / Click / Tap** - Start game or drop block
