@@ -6,6 +6,8 @@
  * - Procedural SFX synthesis (no external assets)
  * - Separate music and SFX volume controls
  * - Perceptual volume curve for natural loudness
+ * - Low-latency mode for Android/mobile (latencyHint: "interactive")
+ * - Auto-resume on background/foreground transitions
  * - Debug logging for development
  */
 
@@ -20,7 +22,7 @@ export interface PlayOptions {
  * Debug flag - set to true to log all audio events.
  * Disabled in production builds.
  */
-const AUDIO_DEBUG = import.meta.env.DEV && true;
+const AUDIO_DEBUG = import.meta.env.DEV && false; // Set to true for debugging
 
 /**
  * Per-sound gain levels for tuning.
@@ -28,7 +30,7 @@ const AUDIO_DEBUG = import.meta.env.DEV && true;
  */
 const GAIN_LEVELS = {
   perfect: 0.30,
-  slice: 0.50,      // Increased from 0.25 for audibility
+  slice: 0.50,
   place: 0.40,
   gameover: 0.35,
   ui: 0.18,
@@ -64,6 +66,9 @@ class AudioManagerImpl {
   private _musicVolume = 80;
   private _sfxVolume = 80;
 
+  // Visibility change handler bound reference
+  private boundVisibilityHandler: (() => void) | null = null;
+
   /**
    * Initialize AudioContext on first user gesture.
    * Must be called from a user interaction event handler.
@@ -75,8 +80,11 @@ class AudioManagerImpl {
     debugLog('Initializing AudioContext from user gesture...');
 
     try {
-      // Create AudioContext
-      this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Create AudioContext with low-latency hint for mobile
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      this.context = new AudioContextClass({
+        latencyHint: 'interactive', // Low-latency mode for Android/mobile
+      });
 
       // Resume if suspended (required by some browsers)
       if (this.context.state === 'suspended') {
@@ -97,14 +105,59 @@ class AudioManagerImpl {
       this.musicGain.connect(this.masterGain);
       this.musicGain.gain.value = volumeToGain(this._musicVolume);
 
+      // Set up visibility change handler to resume context when app comes to foreground
+      this.setupVisibilityHandler();
+
       this.initialized = true;
       debugLog('AudioContext initialized successfully', {
         sampleRate: this.context.sampleRate,
         state: this.context.state,
+        baseLatency: (this.context as any).baseLatency,
       });
     } catch (err) {
       console.warn('AudioManager: Failed to initialize AudioContext', err);
     }
+  }
+
+  /**
+   * Set up visibility change handler to resume AudioContext when app returns from background.
+   * Android WebView suspends AudioContext when the app is backgrounded.
+   */
+  private setupVisibilityHandler(): void {
+    if (this.boundVisibilityHandler) return; // Already set up
+
+    this.boundVisibilityHandler = () => {
+      if (document.visibilityState === 'visible' && this.context?.state === 'suspended') {
+        debugLog('App became visible, resuming AudioContext...');
+        this.context.resume().then(() => {
+          debugLog('AudioContext resumed after visibility change');
+        }).catch((err) => {
+          debugLog('Failed to resume AudioContext:', err);
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', this.boundVisibilityHandler);
+    debugLog('Visibility handler set up');
+  }
+
+  /**
+   * Ensure AudioContext is running. Call this before playing sounds.
+   * Handles cases where context got suspended (e.g., app backgrounded on Android).
+   */
+  private ensureContextRunning(): boolean {
+    if (!this.context || !this.initialized) return false;
+
+    // If context is suspended, try to resume it (non-blocking)
+    if (this.context.state === 'suspended') {
+      debugLog('Context suspended, attempting resume...');
+      this.context.resume().catch(() => {
+        // Ignore errors - will work on next user gesture
+      });
+      // Still allow sound scheduling - it will play when context resumes
+    }
+
+    return true;
   }
 
   /**
@@ -170,6 +223,9 @@ class AudioManagerImpl {
       return;
     }
 
+    // Ensure context is running (handles Android background suspension)
+    this.ensureContextRunning();
+
     debugLog(`play(${name})`, options || '');
 
     switch (name) {
@@ -195,11 +251,21 @@ class AudioManagerImpl {
   }
 
   /**
+   * Get the start time for immediate playback.
+   * Uses a tiny offset to ensure sound starts on next audio processing block.
+   */
+  private getStartTime(): number {
+    // Use currentTime directly for lowest latency
+    // The Web Audio API will start on the next processing block
+    return this.context!.currentTime;
+  }
+
+  /**
    * Perfect hit: Bright ping with upward pitch bend
    */
   private playPerfect(): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.perfect;
 
     // Create oscillator - triangle wave for brightness
@@ -247,11 +313,11 @@ class AudioManagerImpl {
   }
 
   /**
-   * Slice: Crisp noise burst with transient click - IMPROVED for audibility
+   * Slice: Crisp noise burst with transient click
    */
   private playSlice(): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.slice;
 
     // Create noise buffer (30ms for tighter sound)
@@ -265,7 +331,7 @@ class AudioManagerImpl {
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
 
-    // Bandpass filter for focused "slice" character (lowered from 2000Hz)
+    // Bandpass filter for focused "slice" character
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
     filter.frequency.setValueAtTime(1500, now);
@@ -318,7 +384,7 @@ class AudioManagerImpl {
    */
   private playPlace(): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.place;
 
     // Low sine oscillator
@@ -370,7 +436,7 @@ class AudioManagerImpl {
    */
   private playCombo(multiplier: number): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.combo;
 
     // Pitch increases with multiplier: 2x=A5, 3x=C#6, 4+=E6
@@ -428,7 +494,7 @@ class AudioManagerImpl {
    */
   private playGameOver(): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.gameover;
 
     // Main low sweep
@@ -484,7 +550,7 @@ class AudioManagerImpl {
    */
   private playUI(): void {
     const ctx = this.context!;
-    const now = ctx.currentTime;
+    const now = this.getStartTime();
     const baseGain = GAIN_LEVELS.ui;
 
     // Very short sine blip
@@ -565,6 +631,13 @@ class AudioManagerImpl {
    */
   dispose(): void {
     this.stopMusic();
+
+    // Remove visibility handler
+    if (this.boundVisibilityHandler) {
+      document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+      this.boundVisibilityHandler = null;
+    }
+
     if (this.context) {
       this.context.close();
       this.context = null;

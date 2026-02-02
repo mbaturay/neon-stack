@@ -14,6 +14,9 @@ export interface GameState {
   // Currently moving block (null when game over or idle)
   currentBlock: Block | null;
 
+  // Pending next block (deferred spawn to avoid ghost block flicker)
+  pendingNextBlock: Block | null;
+
   // Which axis the current block moves along (alternates)
   movingAxis: Axis;
 
@@ -35,4 +38,5 @@ export interface GameState {
   tick: (deltaMs: number) => void;
   reset: () => void;
   cleanupFallingPieces: () => void;
+  spawnPendingBlock: () => void;
 }

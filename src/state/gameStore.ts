@@ -34,6 +34,7 @@ export const useGameStore = create<GameState>()(
       phase: 'idle',
       blocks: [],
       currentBlock: null,
+      pendingNextBlock: null,
       movingAxis: 'x',
       gameTime: 0,
       score: 0,
@@ -51,6 +52,7 @@ export const useGameStore = create<GameState>()(
           phase: 'playing',
           blocks: [baseBlock],
           currentBlock: firstMovingBlock,
+          pendingNextBlock: null,
           movingAxis: 'x',
           gameTime: 0,
           score: 0,
@@ -76,6 +78,7 @@ export const useGameStore = create<GameState>()(
           set({
             phase: 'gameover',
             currentBlock: null,
+            pendingNextBlock: null,
             fallingPieces: fallingPiece
               ? [...state.fallingPieces, fallingPiece]
               : state.fallingPieces,
@@ -100,9 +103,12 @@ export const useGameStore = create<GameState>()(
             ]
           : state.fallingPieces;
 
+        // Defer spawning the next block to avoid ghost block flicker
+        // The block will be spawned on the next tick after position is computed
         set({
           blocks: newBlocks,
-          currentBlock: nextBlock,
+          currentBlock: null,
+          pendingNextBlock: nextBlock,
           movingAxis: nextAxis,
           score: newScore,
           perfectStreak: newStreak,
@@ -114,7 +120,7 @@ export const useGameStore = create<GameState>()(
 
       tick: (deltaMs: number) => {
         const state = get();
-        if (state.phase !== 'playing' || !state.currentBlock) return;
+        if (state.phase !== 'playing') return;
 
         const newGameTime = state.gameTime + deltaMs;
         const elapsedSeconds = newGameTime / 1000;
@@ -123,7 +129,26 @@ export const useGameStore = create<GameState>()(
         const topBlock = getTopBlock(state.blocks);
         const centerOffset = topBlock.position[state.movingAxis];
 
-        // Update moving block position
+        // If there's a pending block, spawn it with the correct position
+        if (state.pendingNextBlock) {
+          const spawnedBlock = updateBlockOscillation(
+            state.pendingNextBlock,
+            state.movingAxis,
+            elapsedSeconds,
+            centerOffset
+          );
+
+          set({
+            gameTime: newGameTime,
+            currentBlock: spawnedBlock,
+            pendingNextBlock: null,
+          });
+          return;
+        }
+
+        // Normal tick: update moving block position
+        if (!state.currentBlock) return;
+
         const updatedBlock = updateBlockOscillation(
           state.currentBlock,
           state.movingAxis,
@@ -134,6 +159,28 @@ export const useGameStore = create<GameState>()(
         set({
           gameTime: newGameTime,
           currentBlock: updatedBlock,
+        });
+      },
+
+      spawnPendingBlock: () => {
+        const state = get();
+        if (!state.pendingNextBlock) return;
+
+        // Spawn pending block with correct oscillation position
+        const topBlock = getTopBlock(state.blocks);
+        const centerOffset = topBlock.position[state.movingAxis];
+        const elapsedSeconds = state.gameTime / 1000;
+
+        const spawnedBlock = updateBlockOscillation(
+          state.pendingNextBlock,
+          state.movingAxis,
+          elapsedSeconds,
+          centerOffset
+        );
+
+        set({
+          currentBlock: spawnedBlock,
+          pendingNextBlock: null,
         });
       },
 
@@ -153,6 +200,7 @@ export const useGameStore = create<GameState>()(
           phase: 'idle',
           blocks: [],
           currentBlock: null,
+          pendingNextBlock: null,
           movingAxis: 'x',
           gameTime: 0,
           score: 0,
