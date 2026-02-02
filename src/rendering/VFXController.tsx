@@ -85,7 +85,7 @@ export function VFXController() {
         ? topBlock.position.y + topBlock.dimensions.y / 2
         : 0;
       vfxManager.onGameOver({ stackHeight });
-      audioManager.play('gameover');
+      // Note: gameover SFX is now triggered directly in gameStore.dropBlock()
       musicManager.stop();
     }
 
@@ -102,7 +102,7 @@ export function VFXController() {
     }
 
     prevPhaseRef.current = phase;
-  }, [phase, blocks, vfxManager, audioManager, musicManager]);
+  }, [phase, blocks, vfxManager, musicManager]);
 
   // Unified placement detection - triggers on blocks.length increase
   // This handles both perfect and slice placements
@@ -137,14 +137,7 @@ export function VFXController() {
             ),
             topY: topBlock.position.y + topBlock.dimensions.y / 2,
           });
-
-          // Play perfect sound
-          audioManager.play('perfect');
-
-          // Check for combo (streak >= 2)
-          if (perfectStreak >= 2) {
-            audioManager.play('combo', { multiplier: Math.min(perfectStreak, 4) });
-          }
+          // Note: SFX is now triggered directly in gameStore.dropBlock() for lower latency
         } else if (sliceOccurred) {
           // SLICE PLACEMENT - partial overlap with overhang
           const newPiece = fallingPieces[fallingPieces.length - 1];
@@ -190,10 +183,7 @@ export function VFXController() {
               axis,
               cutY,
             });
-
-            // Play slice + place sounds together
-            audioManager.play('place');
-            audioManager.play('slice');
+            // Note: SFX is now triggered directly in gameStore.dropBlock() for lower latency
           }
         }
       }
@@ -204,7 +194,7 @@ export function VFXController() {
     prevFallingCountRef.current = newPieceCount;
     prevLastPerfectRef.current = lastPerfectHit;
     prevPerfectStreakRef.current = perfectStreak;
-  }, [blocks, fallingPieces, lastPerfectHit, perfectStreak, vfxManager, audioManager]);
+  }, [blocks, fallingPieces, lastPerfectHit, perfectStreak, vfxManager]);
 
   // Update VFX manager each frame
   useFrame((_, delta) => {

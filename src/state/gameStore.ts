@@ -14,6 +14,7 @@ import {
 } from '@/core/geometry';
 import { updateBlockOscillation, createFallingPiece, shouldRemoveFallingPiece } from '@/core/physics';
 import { calculateHitScore, updatePerfectStreak } from '@/core/scoring';
+import { getAudioManager } from '@/audio';
 
 function getNextAxis(current: Axis): Axis {
   return current === 'x' ? 'z' : 'x';
@@ -69,8 +70,17 @@ export const useGameStore = create<GameState>()(
         const topBlock = getTopBlock(state.blocks);
         const result = sliceBlock(state.currentBlock, topBlock, state.movingAxis);
 
+        // ==========================================
+        // PLAY SFX IMMEDIATELY - before state updates
+        // This is critical for low-latency audio on Android
+        // ==========================================
+        const audio = getAudioManager();
+
         if (!result.kept) {
           // Complete miss - game over
+          // Play gameover sound FIRST, before state update
+          audio.play('gameover');
+
           const fallingPiece = result.fallen
             ? createFallingPiece(result.fallen, topBlock, state.movingAxis, state.gameTime)
             : null;
@@ -87,7 +97,21 @@ export const useGameStore = create<GameState>()(
           return;
         }
 
-        // Successful placement
+        // Successful placement - play SFX immediately
+        if (result.isPerfect) {
+          // Perfect hit: play perfect sound + combo if streak
+          audio.play('perfect');
+          const newStreak = updatePerfectStreak(state.perfectStreak, result.isPerfect);
+          if (newStreak >= 2) {
+            audio.play('combo', { multiplier: Math.min(newStreak, 4) });
+          }
+        } else {
+          // Slice hit: play place + slice sounds
+          audio.play('place');
+          audio.play('slice');
+        }
+
+        // Now do state calculations
         const newStreak = updatePerfectStreak(state.perfectStreak, result.isPerfect);
         const points = calculateHitScore(state.perfectStreak, result.isPerfect);
         const newScore = state.score + points;
