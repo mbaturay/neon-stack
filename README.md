@@ -1,10 +1,12 @@
 # Neon Stack
 
-A Tron-inspired block stacking game built with React, Three.js, and TypeScript.
+A Tron-inspired block stacking game with arcade-style juice effects. Built with React, Three.js, and TypeScript.
 
+```
 ***************************
-** Murat Baturay (c)2026 **
+** Murat Baturay (c)2025 **
 ***************************
+```
 
 ## Quick Start
 
@@ -17,36 +19,98 @@ Open http://localhost:5173 (or use your LAN IP for mobile testing).
 
 ## How to Play
 
-**Goal:** stack blocks as high as you can without missing.
+**Goal:** Stack blocks as high as you can without missing.
 
-1. **Start** the game with **Space / Enter / Click / Tap**.
-2. Watch the moving block slide back and forth.
-3. **Drop** at the right moment to land on the stack.
-4. Any part that overhangs gets **sliced off** (making the next block smaller).
-5. Keep landing blocks to build **combo multipliers** and increase your score.
+### Controls
 
-### Scoring & Combos
+| Input | Action |
+|-------|--------|
+| **Space / Enter** | Start game or drop block |
+| **Click / Tap** | Start game or drop block |
+| **Esc** | Open settings |
 
-- **Perfect hits** (very small offset) preserve the block size and build a streak.
-- Streaks increase your **combo multiplier** (2x, 4x, 8x, ...).
-- The game ends when a block **completely misses** the stack.
+### Gameplay
+
+1. **Start** the game with Space, Enter, Click, or Tap
+2. Watch the moving block slide back and forth
+3. **Drop** at the right moment to land on the stack
+4. Any part that overhangs gets **sliced off** (making the next block smaller)
+5. Keep landing blocks to build **combo multipliers** and increase your score
+
+### Scoring
+
+| Placement | Points | Effect |
+|-----------|--------|--------|
+| **Perfect** | Base + Combo Bonus | Block size preserved, streak continues |
+| **Slice** | Base points | Overhang falls, block shrinks |
+| **Miss** | Game Over | Better luck next time! |
+
+- **Combo multipliers** build with consecutive perfect hits (2x, 4x, 8x...)
+- The smaller your block gets, the harder perfect hits become
 
 ### Tips
 
-- Focus on the **leading edge** of the moving block.
-- Early in the run, prioritize **perfect hits** to keep the block large.
-- If the block gets tiny, aim for **safe center landings** to stabilize.
+- Focus on the **leading edge** of the moving block
+- Early in the run, prioritize **perfect hits** to keep the block large
+- If the block gets tiny, aim for **safe center landings** to stabilize
+- Watch for the **glow flash** on perfect landings
 
-### Settings / Audio Notes
+## Features
 
-- You can adjust **Music** and **SFX** volume in the in-game settings.
-- Browsers require a **user gesture** before playing audio; on mobile/macOS, click/tap once if you don’t hear music right away.
+### Visual Styles
 
-## Controls
+The game includes multiple visual styles accessible from Settings:
 
-- **Space / Enter / Click / Tap** - Start game or drop block
-- Blocks alternate between X and Z axis movement
-- Land blocks precisely for combo multipliers
+- **Style A** - Classic neon aesthetic with bloom and glow
+- **Style B** - Alternative visual treatment
+- **Style C** - Minimalist approach
+
+### Juice System
+
+Arcade-style feedback effects that make the game feel impactful:
+
+| Effect | Description |
+|--------|-------------|
+| **Camera Shake** | Damped impulse kick on block placement |
+| **Hit-Stop** | Brief freeze frame on impact (fighting game style) |
+| **Grid Pulse** | Visual flash feedback on the ground grid |
+| **Grid Motion** | Subtle parallax movement following the action |
+
+Perfect placements trigger stronger effects than slice placements.
+
+### Theme Colors
+
+Choose from multiple neon color themes:
+- Cyan (default)
+- Magenta
+- Green
+- Orange
+- And more...
+
+### Accessibility
+
+- **Reduced Motion** - Disables camera shake, grid motion, and reduces pulse intensity
+- Individual toggles for each juice effect
+- Adjustable music and SFX volume
+
+## Settings
+
+Access settings via the gear icon or **Esc** key:
+
+- **Visual Style** - Choose between visual variants
+- **Theme Color** - Pick your neon color
+- **Music Volume** - Background music level (0-100)
+- **SFX Volume** - Sound effects level (0-100)
+- **Reduced Motion** - Accessibility option
+- **Camera Shake** - Toggle impact shake
+- **Grid Pulse** - Toggle placement flash
+- **Grid Motion** - Toggle parallax effect
+- **Hit-Stop** - Toggle freeze frames
+
+### Audio Notes
+
+- Browsers require a **user gesture** before playing audio
+- On mobile/macOS, click or tap once if you don't hear music right away
 
 ## Scripts
 
@@ -72,8 +136,24 @@ src/
 │   └── __tests__/        # Unit tests
 │
 ├── state/
-│   ├── gameStore.ts      # Zustand store
+│   ├── gameStore.ts      # Zustand game state
+│   ├── settingsStore.ts  # Persisted settings
+│   ├── visualStore.ts    # Visual configuration
 │   └── types.ts          # State types
+│
+├── game/
+│   ├── juice/            # Arcade feedback system
+│   │   ├── CameraShake.ts    # Damped impulse shake
+│   │   ├── HitStop.ts        # Freeze frame controller
+│   │   ├── GridPulse.ts      # Visual pulse effect
+│   │   ├── GridMotionController.ts  # Parallax movement
+│   │   └── JuiceConfig.ts    # Tuning constants
+│   ├── vfx/              # Particle effects
+│   └── Theme.ts          # Color theming
+│
+├── audio/                # Sound system
+│   ├── AudioManager.ts   # SFX playback
+│   └── MusicManager.ts   # Background music
 │
 ├── rendering/            # React Three Fiber components
 │   ├── Scene.tsx         # Main canvas & setup
@@ -81,24 +161,27 @@ src/
 │   ├── BlockStack.tsx    # Placed blocks
 │   ├── MovingBlock.tsx   # Current oscillating block
 │   ├── FallingPiece.tsx  # Sliced-off pieces
-│   ├── CameraRig.tsx     # Smooth camera follow
+│   ├── CameraRig.tsx     # Smooth camera follow + shake
+│   ├── VFXController.tsx # Effect orchestration
 │   ├── Effects.tsx       # Bloom post-processing
-│   └── Ground.tsx        # Grid floor
+│   └── Ground.tsx        # Grid floor with pulse
 │
 ├── ui/                   # React UI overlay
-│   ├── HUD.tsx           # Score & screens
+│   ├── HUD.tsx           # Score & game screens
+│   ├── Settings.tsx      # Settings panel
 │   └── ComboIndicator.tsx
 │
 └── hooks/
     ├── useGameLoop.ts    # Fixed timestep loop
-    └── useInput.ts       # Keyboard/touch handling
+    ├── useInput.ts       # Keyboard/touch handling
+    └── useHitStop.ts     # HitStop state hook
 ```
 
 ## Design Decisions
 
 ### Deterministic Game Logic
 
-All game logic uses a fixed 16ms timestep with an accumulator pattern. This ensures identical behavior regardless of frame rate:
+All game logic uses a fixed 16ms timestep with an accumulator pattern:
 
 ```typescript
 while (accumulator >= FIXED_TIMESTEP) {
@@ -109,11 +192,21 @@ while (accumulator >= FIXED_TIMESTEP) {
 
 ### Pure Core Module
 
-The `core/` directory contains pure functions with zero dependencies on React or Three.js. This enables:
+The `core/` directory contains pure functions with zero dependencies on React or Three.js:
 
-- Fast unit tests (53 tests run in <400ms)
+- Fast unit tests
 - Potential server-side validation
-- Deterministic replay
+- Deterministic replay capability
+
+### Juice System
+
+The arcade feedback system uses singleton controllers for global state:
+
+- **CameraShake**: Damped sine wave impulse (`sin(ωt) * e^(-dt)`)
+- **HitStop**: Time scale control (0 = frozen, 1 = normal)
+- **GridPulse**: Additive brightness with exponential decay
+
+All effects respect the `reducedMotion` accessibility setting.
 
 ### Geometry Reuse
 
@@ -124,23 +217,11 @@ All blocks share a single `BoxGeometry` instance, scaled per-block. This minimiz
 - **Vite** - Build tooling
 - **React 18** - UI framework
 - **React Three Fiber** - Declarative Three.js
-- **Zustand** - State management
+- **Three.js** - 3D rendering
+- **Zustand** - State management with persistence
 - **Vitest** - Testing
 - **TypeScript** - Strict mode enabled
-
-## Game Mechanics
-
-1. Blocks oscillate back and forth along alternating axes
-2. Tap to drop the current block onto the stack
-3. Overhanging portions are sliced off and fall away
-4. **Perfect hits** (within 0.1 units) keep the full block size and build combo streaks
-5. Combos multiply score: 2x, 4x, 8x, etc.
-6. Game ends when a block completely misses the stack
 
 ## License
 
 MIT
-
-## About Me
-
-I'm a winner, I'm a sinner, do you want my authograph?
