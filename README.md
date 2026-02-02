@@ -221,6 +221,174 @@ All blocks share a single `BoxGeometry` instance, scaled per-block. This minimiz
 - **Zustand** - State management with persistence
 - **Vitest** - Testing
 - **TypeScript** - Strict mode enabled
+- **Capacitor** - Native Android wrapper
+
+---
+
+## Android App
+
+The game can be built as a native Android application using Capacitor.
+
+### Prerequisites
+
+- **Node.js** 18+ and npm
+- **Android Studio** (latest stable)
+- **Android SDK** (API 22+ for target, API 34+ recommended)
+- **Java 17** (bundled with Android Studio or install separately)
+
+### Quick Start
+
+```bash
+# First time setup
+npm install
+npm run build
+npx cap add android   # Only needed once
+npx cap sync android
+
+# Open in Android Studio
+npm run android:open
+```
+
+### Development Workflow
+
+| Command | Description |
+|---------|-------------|
+| `npm run android:sync` | Build web + sync to Android |
+| `npm run android:open` | Open Android Studio |
+| `npm run android:run` | Build, sync, and run on connected device/emulator |
+
+### Running on Emulator
+
+1. Open Android Studio with `npm run android:open`
+2. Wait for Gradle sync to complete
+3. Select an emulator from the device dropdown (or create one via AVD Manager)
+4. Click the green **Run** button (or press Shift+F10)
+
+### Running on Physical Device
+
+1. Enable **Developer Options** on your Android device
+2. Enable **USB Debugging** in Developer Options
+3. Connect device via USB and accept the debugging prompt
+4. Run `npm run android:run` or use Android Studio
+
+### Building Release APK/AAB
+
+#### Debug APK (for testing)
+
+```bash
+# Build and sync first
+npm run android:sync
+
+# Then in Android Studio:
+# Build → Build Bundle(s) / APK(s) → Build APK(s)
+
+# Or via command line:
+cd android
+./gradlew assembleDebug
+# APK location: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+#### Release AAB (for Google Play)
+
+1. **Generate a signing key** (one-time):
+   ```bash
+   keytool -genkey -v -keystore neon-stack-release.keystore -alias neon-stack -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. **Configure signing** in `android/app/build.gradle`:
+   ```gradle
+   android {
+       signingConfigs {
+           release {
+               storeFile file('path/to/neon-stack-release.keystore')
+               storePassword 'your-store-password'
+               keyAlias 'neon-stack'
+               keyPassword 'your-key-password'
+           }
+       }
+       buildTypes {
+           release {
+               signingConfig signingConfigs.release
+               minifyEnabled true
+               proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+           }
+       }
+   }
+   ```
+
+3. **Build the release AAB**:
+   ```bash
+   cd android
+   ./gradlew bundleRelease
+   # AAB location: android/app/build/outputs/bundle/release/app-release.aab
+   ```
+
+### App Configuration
+
+The Android app is configured in `capacitor.config.ts`:
+
+| Setting | Value |
+|---------|-------|
+| App ID | `com.murat.neonstack` |
+| App Name | Neon Stack |
+| Web Directory | `dist` |
+
+To change the app ID (required for Play Store):
+1. Update `appId` in `capacitor.config.ts`
+2. Update package name in `android/app/build.gradle`
+3. Rename package directories in `android/app/src/main/java/`
+
+### Features
+
+- **Fullscreen immersive mode** - No status bar or navigation bar during gameplay
+- **Portrait orientation lock** - Consistent gameplay experience
+- **Keep screen on** - Screen won't dim during gameplay
+- **Hardware accelerated WebView** - Smooth 3D rendering
+- **Audio support** - Music and SFX work after first user interaction
+
+### Troubleshooting
+
+**Gradle sync fails:**
+- File → Invalidate Caches → Restart
+- Delete `android/.gradle` and sync again
+
+**App crashes on launch:**
+- Check `adb logcat` for errors
+- Ensure `dist/` folder exists (`npm run build`)
+- Run `npx cap sync android` after any web changes
+
+**Audio not playing:**
+- Audio requires a user gesture (tap) to start on Android
+- The game already handles this - tap to start triggers audio
+
+**Black screen:**
+- Check for JavaScript errors in Chrome DevTools (chrome://inspect)
+- Ensure WebView hardware acceleration is enabled (it is by default)
+
+**Touch not responding:**
+- Check viewport meta tag in `index.html`
+- Ensure no conflicting touch handlers
+
+### Project Structure
+
+```
+android/
+├── app/
+│   ├── src/main/
+│   │   ├── java/com/murat/neonstack/
+│   │   │   └── MainActivity.java    # Fullscreen + immersive mode
+│   │   ├── res/
+│   │   │   ├── drawable/            # App icon background
+│   │   │   ├── drawable-v24/        # App icon foreground
+│   │   │   ├── mipmap-*/            # Launcher icons (all densities)
+│   │   │   ├── values/              # Theme colors, strings
+│   │   │   └── xml/                 # File provider config
+│   │   ├── assets/public/           # Compiled web app (synced from dist/)
+│   │   └── AndroidManifest.xml      # App permissions, orientation
+│   └── build.gradle                 # App-level Gradle config
+├── build.gradle                     # Project-level Gradle config
+└── capacitor.config.json            # Capacitor runtime config
+```
 
 ## License
 

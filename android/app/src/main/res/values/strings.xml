@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Neon Stack</string>
+    <string name="title_activity_main">Neon Stack</string>
+    <string name="package_name">com.murat.neonstack</string>
+    <string name="custom_url_scheme">com.murat.neonstack</string>
+</resources>
