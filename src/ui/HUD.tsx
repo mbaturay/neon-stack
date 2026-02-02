@@ -18,6 +18,7 @@ export function HUD() {
 
       {phase === 'idle' && (
         <div className={styles['startScreen']}>
+          {/* <div className={styles['title']}>BATURAY&apos;s</div>  */}
           <h1 className={styles['title']}>NEON STACK</h1>
           <p className={styles['subtitle']}>TAP TO START</p>
           {highScore > 0 && (
