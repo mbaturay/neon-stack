@@ -3,3 +3,5 @@ node_modules
 nul
 NUL
 dist/
+# Android Studio / IntelliJ
+.idea/
