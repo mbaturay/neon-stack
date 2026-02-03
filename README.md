@@ -1,6 +1,8 @@
 # Neon Stack
 
 A Tron-inspired block stacking game with arcade-style juice effects. Built with React, Three.js, and TypeScript.
+getDefaultProguardFile('proguard-android-optimize.txt')
+
 
 ```
 ***************************
