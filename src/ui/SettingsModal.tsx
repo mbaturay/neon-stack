@@ -112,9 +112,9 @@ function Toggle({ label, checked, onChange, id, disabled = false }: ToggleProps)
             onChange(!checked);
           }}
           role="switch"
-          aria-checked={checked ? 'true' : 'false'}
+          aria-checked={checked}
           aria-labelledby={labelId}
-          aria-disabled={disabled ? 'true' : 'false'}
+          aria-disabled={disabled}
           disabled={disabled}
           data-no-game-input
         >
